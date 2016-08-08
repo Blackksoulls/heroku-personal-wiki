@@ -142,4 +142,3 @@ wfLoadExtension( 'WikiEditor' );
 # Add more configuration options below.
 
 require_once "$IP/extensions/Spoilers/Spoilers.php";
-require_once "$IP/extensions/Code/Code.php";
