@@ -44,8 +44,8 @@ $wgLogo = "$wgResourceBasePath/resources/assets/wiki.png";
 $wgEnableEmail = true;
 $wgEnableUserEmail = true; # UPO
 
-$wgEmergencyContact = "no-reply@wikikuro.herokuapp.com";
-$wgPasswordSender = "no-reply@wikikuro.herokuapp.com";
+$wgEmergencyContact = "noreply@wikikuro.herokuapp.com";
+$wgPasswordSender = "noreply@wikikuro.herokuapp.com";
 
 $wgEnotifUserTalk = true; # UPO
 $wgEnotifWatchlist = true; # UPO
