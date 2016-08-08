@@ -5,14 +5,12 @@
  * @license GPL-2.0+
  */
 
-namespace LocalisationUpdate;
-
 /**
  * Fetches files over HTTP(s).
  */
-class HttpFetcher implements Fetcher {
+class LU_HttpFetcher implements LU_Fetcher {
 	public function fetchFile( $url ) {
-		return \Http::get( $url );
+		return Http::get( $url );
 	}
 
 	/**
@@ -22,9 +20,9 @@ class HttpFetcher implements Fetcher {
 	public function fetchDirectory( $pattern ) {
 		$files = array();
 
-		$languages = \Language::fetchLanguageNames( null, 'mwfile' );
+		$languages = Language::fetchLanguageNames( null, 'mwfile' );
 
-		foreach ( array_keys( $languages ) as $code ) {
+		foreach( array_keys( $languages ) as $code ) {
 			// Hack for core
 			if ( strpos( $pattern, 'Messages*.php' ) !== false ) {
 				$code = ucfirst( strtr( $code, '-', '_' ) );

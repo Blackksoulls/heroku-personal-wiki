@@ -5,11 +5,9 @@
  * @license GPL-2.0+
  */
 
-namespace LocalisationUpdate;
-
-class FinderTest extends \PHPUnit_Framework_TestCase {
+class LU_FinderTest extends MediaWikiTestCase {
 	public function testGetComponents() {
-		$finder = new Finder(
+		$finder = new LU_Finder(
 			array(
 				'TranslateSearch' => '/IP/extensions/Translate/TranslateSearch.i18n.php',
 				'Babel' => '/IP/extensions/Babel/Babel.i18n.php',

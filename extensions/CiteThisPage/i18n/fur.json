@@ -2,13 +2,11 @@
 	"@metadata": {
 		"authors": [
 			"Klenje",
-			"MF-Warburg",
-			"Tocaibon"
+			"MF-Warburg"
 		]
 	},
 	"citethispage": "Citazion",
 	"citethispage-link": "Cite cheste vôs",
-	"tooltip-citethispage": "Cemût citâ cheste pagjine",
 	"citethispage-change-submit": "Cree la citazion",
 	"citethispage-change-target": "Pagjine:"
 }

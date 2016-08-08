@@ -5,12 +5,10 @@
  * @license GPL-2.0+
  */
 
-namespace LocalisationUpdate;
-
 /**
  * Interface for classes which fetch files over different protocols and ways.
  */
-interface Fetcher {
+interface LU_Fetcher {
 	/**
 	 * Fetches a single resource.
 	 *

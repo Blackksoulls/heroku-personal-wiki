@@ -144,12 +144,16 @@ class GadgetHooks {
 	public static function registerModules( &$resourceLoader ) {
 		$repo = GadgetRepo::singleton();
 		$ids = $repo->getGadgetIds();
+		if ( !$ids ) {
+			return true;
+		}
 
 		foreach ( $ids as $id ) {
-			$resourceLoader->register( Gadget::getModuleName( $id ), array(
-				'class' => 'GadgetResourceLoaderModule',
-				'id' => $id,
-			) );
+			$g = $repo->getGadget( $id );
+			$module = $g->getModule();
+			if ( $module ) {
+				$resourceLoader->register( $g->getModuleName(), $module );
+			}
 		}
 
 		return true;
@@ -176,15 +180,11 @@ class GadgetHooks {
 		 */
 		$user = $out->getUser();
 		foreach ( $ids as $id ) {
-			try {
-				$gadget = $repo->getGadget( $id );
-			} catch ( InvalidArgumentException $e ) {
-				continue;
-			}
+			$gadget = $repo->getGadget( $id );
 			if ( $gadget->isEnabled( $user ) && $gadget->isAllowed( $user ) ) {
 				if ( $gadget->hasModule() ) {
-					$out->addModuleStyles( Gadget::getModuleName( $gadget->getName() ) );
-					$out->addModules( Gadget::getModuleName( $gadget->getName() ) );
+					$out->addModuleStyles( $gadget->getModuleName() );
+					$out->addModules( $gadget->getModuleName() );
 				}
 
 				if ( $gadget->getLegacyScripts() ) {
@@ -213,95 +213,6 @@ class GadgetHooks {
 		);
 	}
 
-
-	/**
-	 * Valid gadget definition page after content is modified
-	 *
-	 * @param IContextSource $context
-	 * @param Content $content
-	 * @param Status $status
-	 * @param string $summary
-	 * @throws Exception
-	 * @return bool
-	 */
-	public static function onEditFilterMergedContent( $context, $content, $status, $summary ) {
-		$title = $context->getTitle();
-
-		if ( !$title->inNamespace( NS_GADGET_DEFINITION ) ) {
-			return true;
-		}
-
-		if ( !$content instanceof GadgetDefinitionContent ) {
-			// This should not be possible?
-			throw new Exception( "Tried to save non-GadgetDefinitionContent to {$title->getPrefixedText()}" );
-		}
-
-		$status = $content->validate();
-		if ( !$status->isGood() ) {
-			$status->merge( $status );
-			return false;
-		}
-
-		return true;
-	}
-
-	/**
-	 * After a new page is created in the Gadget definition namespace,
-	 * invalidate the list of gadget ids
-	 *
-	 * @param WikiPage $page
-	 */
-	public static function onPageContentInsertComplete( WikiPage $page ) {
-		if ( $page->getTitle()->inNamespace( NS_GADGET_DEFINITION ) ) {
-			$repo = GadgetRepo::singleton();
-			if ( $repo instanceof GadgetDefinitionNamespaceRepo ) {
-				$repo->purgeGadgetIdsList();
-			}
-		}
-	}
-
-	/**
-	 * Mark the Title as having a content model of javascript or css for pages
-	 * in the Gadget namespace based on their file extension
-	 *
-	 * @param Title $title
-	 * @param string $model
-	 * @return bool
-	 */
-	public static function onContentHandlerDefaultModelFor( Title $title, &$model ) {
-		if ( $title->inNamespace( NS_GADGET ) ) {
-			preg_match( '!\.(css|js)$!u', $title->getText(), $ext );
-			$ext = isset( $ext[1] ) ? $ext[1] : '';
-			switch ( $ext ) {
-				case 'js':
-					$model = 'javascript';
-					return false;
-				case 'css':
-					$model = 'css';
-					return false;
-			}
-		}
-
-		return true;
-	}
-
-	/**
-	 * Set the CodeEditor language for Gadget definition pages. It already
-	 * knows the language for Gadget: namespace pages.
-	 *
-	 * @param Title $title
-	 * @param string $lang
-	 * @return bool
-	 */
-	public static function onCodeEditorGetPageLanguage( Title $title, &$lang ) {
-		if ( $title->hasContentModel( 'GadgetDefinition' ) ) {
-			$lang = 'json';
-			return false;
-		}
-
-		return true;
-	}
-
 	/**
 	 * UnitTestsList hook handler
 	 * @param array $files
@@ -310,16 +221,6 @@ class GadgetHooks {
 	public static function onUnitTestsList( array &$files ) {
 		$testDir = __DIR__ . '/tests/';
 		$files = array_merge( $files, glob( "$testDir/*Test.php" ) );
-		return true;
-	}
-
-	/**
-	 * Add the GadgetUsage special page to the list of QueryPages.
-	 * @param array &$queryPages
-	 * @return bool
-	 */
-	public static function onwgQueryPages( &$queryPages ) {
-		$queryPages[] = array( 'SpecialGadgetUsage', 'GadgetUsage' );
 		return true;
 	}
 }

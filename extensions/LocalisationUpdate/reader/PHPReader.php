@@ -5,12 +5,10 @@
  * @license GPL-2.0+
  */
 
-namespace LocalisationUpdate;
-
 /**
  * Reads MediaWiki PHP i18n files.
  */
-class PHPReader implements Reader {
+class LU_PHPReader implements LU_Reader {
 	/// @var string Language tag
 	protected $code;
 
@@ -25,7 +23,7 @@ class PHPReader implements Reader {
 		}
 
 		$php = $this->cleanupFile( $contents );
-		$reader = new \QuickArrayReader( "<?php $php" );
+		$reader = new QuickArrayReader( "<?php $php" );
 		$messages = $reader->getVar( 'messages' );
 
 		if ( $this->code ) {

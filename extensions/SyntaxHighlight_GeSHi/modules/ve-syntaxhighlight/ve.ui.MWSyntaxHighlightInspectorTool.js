@@ -11,28 +11,27 @@
  * MediaWiki UserInterface syntax highlight tool.
  *
  * @class
- * @extends ve.ui.FragmentInspectorTool
+ * @extends ve.ui.InspectorTool
  * @constructor
  * @param {OO.ui.ToolGroup} toolGroup
  * @param {Object} [config] Configuration options
  */
-ve.ui.MWSyntaxHighlightInspectorTool = function VeUiMWSyntaxHighlightInspectorTool() {
-	ve.ui.MWSyntaxHighlightInspectorTool.super.apply( this, arguments );
+ve.ui.MWSyntaxHighlightInspectorTool = function VeUiMWSyntaxHighlightInspectorTool( toolGroup, config ) {
+	ve.ui.InspectorTool.call( this, toolGroup, config );
 };
-OO.inheritClass( ve.ui.MWSyntaxHighlightInspectorTool, ve.ui.FragmentInspectorTool );
-ve.ui.MWSyntaxHighlightInspectorTool.static.name = 'syntaxhighlightInspector';
+OO.inheritClass( ve.ui.MWSyntaxHighlightInspectorTool, ve.ui.InspectorTool );
+ve.ui.MWSyntaxHighlightInspectorTool.static.name = 'syntaxhighlight';
 ve.ui.MWSyntaxHighlightInspectorTool.static.group = 'object';
 ve.ui.MWSyntaxHighlightInspectorTool.static.icon = 'alienextension';
 ve.ui.MWSyntaxHighlightInspectorTool.static.title = OO.ui.deferMsg(
 	'syntaxhighlight-visualeditor-mwsyntaxhighlightinspector-title' );
-ve.ui.MWSyntaxHighlightInspectorTool.static.modelClasses = [ ve.dm.MWInlineSyntaxHighlightNode ];
-ve.ui.MWSyntaxHighlightInspectorTool.static.commandName = 'syntaxhighlightInspector';
-ve.ui.MWSyntaxHighlightInspectorTool.static.autoAddToCatchall = false;
+ve.ui.MWSyntaxHighlightInspectorTool.static.modelClasses = [ ve.dm.MWBlockSyntaxHighlightNode, ve.dm.MWInlineSyntaxHighlightNode ];
+ve.ui.MWSyntaxHighlightInspectorTool.static.commandName = 'syntaxhighlight';
 ve.ui.toolFactory.register( ve.ui.MWSyntaxHighlightInspectorTool );
 
 ve.ui.commandRegistry.register(
 	new ve.ui.Command(
-		'syntaxhighlightInspector', 'window', 'open',
-		{ args: [ 'syntaxhighlightInspector' ], supportedSelections: [ 'linear' ] }
+		'syntaxhighlight', 'window', 'open',
+		{ args: [ 'syntaxhighlight' ], supportedSelections: [ 'linear' ] }
 	)
 );

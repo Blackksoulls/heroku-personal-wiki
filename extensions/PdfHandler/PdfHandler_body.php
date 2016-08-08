@@ -359,10 +359,10 @@ class PdfHandler extends ImageHandler {
 	}
 
 	/**
-	 * @param File $image
+	 * @param $image
 	 * @return bool|int
 	 */
-	function pageCount( File $image ) {
+	function pageCount( $image ) {
 		$data = $this->getMetaArray( $image );
 		if ( !$data || !isset( $data['Pages'] ) ) {
 			return false;
@@ -375,7 +375,7 @@ class PdfHandler extends ImageHandler {
 	 * @param $page int
 	 * @return array|bool
 	 */
-	function getPageDimensions( File $image, $page ) {
+	function getPageDimensions( $image, $page ) {
 		$data = $this->getMetaArray( $image );
 		return PdfImage::getPageSize( $data, $page );
 	}
@@ -385,7 +385,7 @@ class PdfHandler extends ImageHandler {
 	 * @param $page int
 	 * @return bool
 	 */
-	function getPageText( File $image, $page ) {
+	function getPageText( $image, $page ) {
 		$data = $this->getMetaArray( $image, true );
 		if ( !$data || !isset( $data['text'] ) || !isset( $data['text'][$page - 1] ) ) {
 			return false;

@@ -44,6 +44,14 @@ class PurgeAction extends FormAction {
 		return '';
 	}
 
+	/**
+	 * Just get an empty form with a single submit button
+	 * @return array
+	 */
+	protected function getFormFields() {
+		return array();
+	}
+
 	public function onSubmit( $data ) {
 		return $this->page->doPurge();
 	}
@@ -58,23 +66,12 @@ class PurgeAction extends FormAction {
 		// This will throw exceptions if there's a problem
 		$this->checkCanExecute( $this->getUser() );
 
-		$user = $this->getUser();
-
-		if ( $user->pingLimiter( 'purge' ) ) {
-			// TODO: Display actionthrottledtext
-			return;
-		}
-
-		if ( $user->isAllowed( 'purge' ) ) {
-			// This will update the database immediately, even on HTTP GET.
-			// Lots of uses may exist for this feature, so just ignore warnings.
-			Profiler::instance()->getTransactionProfiler()->resetExpectations();
-
+		if ( $this->getUser()->isAllowed( 'purge' ) ) {
 			$this->redirectParams = wfArrayToCgi( array_diff_key(
 				$this->getRequest()->getQueryValues(),
-				[ 'title' => null, 'action' => null ]
+				array( 'title' => null, 'action' => null )
 			) );
-			if ( $this->onSubmit( [] ) ) {
+			if ( $this->onSubmit( array() ) ) {
 				$this->onSuccess();
 			}
 		} else {
@@ -100,9 +97,5 @@ class PurgeAction extends FormAction {
 
 	public function onSuccess() {
 		$this->getOutput()->redirect( $this->getTitle()->getFullURL( $this->redirectParams ) );
-	}
-
-	public function doesWrites() {
-		return true;
 	}
 }

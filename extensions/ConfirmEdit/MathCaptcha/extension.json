@@ -5,6 +5,5 @@
 	},
 	"config": {
 		"CaptchaClass": "MathCaptcha"
-	},
-	"manifest_version": 1
+	}
 }

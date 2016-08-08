@@ -23,11 +23,11 @@ class RenameuserHooks {
 				'renameuser',
 				$page,
 				'',
-				[
+				array(
 					'lim' => 10,
 					'showIfEmpty' => false,
-					'msgKey' => [ 'renameuser-renamed-notice', $title->getBaseText() ]
-				]
+					'msgKey' => array( 'renameuser-renamed-notice', $title->getBaseText() )
+				)
 			);
 		}
 
@@ -46,12 +46,12 @@ class RenameuserHooks {
 	public static function onContributionsToolLinks( $id, $nt, &$tools ) {
 		global $wgUser;
 
-		if ( $id && $wgUser->isAllowed( 'renameuser' ) ) {
+		if ( $wgUser->isAllowed( 'renameuser' ) && $id ) {
 			$tools[] = Linker::link(
 				SpecialPage::getTitleFor( 'Renameuser' ),
 				wfMessage( 'renameuser-linkoncontribs' )->escaped(),
-				[ 'title' => wfMessage( 'renameuser-linkoncontribs-text' )->parse() ],
-				[ 'oldusername' => $nt->getText() ]
+				array( 'title' => wfMessage( 'renameuser-linkoncontribs-text' )->parse() ),
+				array( 'oldusername' => $nt->getText() )
 			);
 		}
 

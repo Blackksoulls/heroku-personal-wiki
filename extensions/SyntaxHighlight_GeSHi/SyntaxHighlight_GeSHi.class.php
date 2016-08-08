@@ -48,8 +48,11 @@ class SyntaxHighlight_GeSHi {
 		if ( $wgPygmentizePath === false ) {
 			$wgPygmentizePath = __DIR__ . '/pygments/pygmentize';
 		}
-	}
 
+		if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
+			require_once __DIR__ . '/vendor/autoload.php';
+		}
+	}
 	/**
 	 * Get the Pygments lexer name for a particular language.
 	 *
@@ -200,7 +203,7 @@ class SyntaxHighlight_GeSHi {
 	 * @return Status Status object, with HTML representing the highlighted
 	 *  code as its value.
 	 */
-	public static function highlight( $code, $lang = null, $args = array() ) {
+	protected static function highlight( $code, $lang = null, $args = array() ) {
 		global $wgPygmentizePath;
 
 		$status = new Status;
@@ -271,7 +274,7 @@ class SyntaxHighlight_GeSHi {
 			$options['nowrap'] = 1;
 		}
 
-		$cache = ObjectCache::getMainWANInstance();
+		$cache = wfGetMainCache();
 		$cacheKey = self::makeCacheKey( $code, $lexer, $options );
 		$output = $cache->get( $cacheKey );
 
@@ -497,8 +500,8 @@ class SyntaxHighlight_GeSHi {
 
 	/** Backward-compatibility shim for extensions. */
 	public static function buildHeadItem( $geshi ) {
-		wfDeprecated( __METHOD__ );
-		$geshi->parse_code();
-		return '';
+			wfDeprecated( __METHOD__ );
+			$geshi->parse_code();
+			return '';
 	}
 }

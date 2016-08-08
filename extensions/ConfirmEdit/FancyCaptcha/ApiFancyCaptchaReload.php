@@ -9,11 +9,10 @@ class ApiFancyCaptchaReload extends ApiBase {
 	public function execute() {
 		# Get a new FancyCaptcha form data
 		$captcha = new FancyCaptcha();
-		$info = $captcha->getCaptcha();
-		$captchaIndex = $captcha->storeCaptcha( $info );
+		$captchaIndex = $captcha->getCaptchaIndex();
 
 		$result = $this->getResult();
-		$result->addValue( null, $this->getModuleName(), [ 'index' => $captchaIndex ] );
+		$result->addValue( null, $this->getModuleName(), array ( 'index' => $captchaIndex ) );
 		return true;
 	}
 
@@ -25,23 +24,23 @@ class ApiFancyCaptchaReload extends ApiBase {
 	}
 
 	public function getAllowedParams() {
-		return [];
+		return array();
 	}
 
 	/**
 	 * @deprecated since MediaWiki core 1.25
 	 */
 	public function getExamples() {
-		return [ 'api.php?action=fancycaptchareload&format=xml' ];
+		return array( 'api.php?action=fancycaptchareload&format=xml' );
 	}
 
 	/**
 	 * @see ApiBase::getExamplesMessages()
 	 */
 	protected function getExamplesMessages() {
-		return [
+		return array(
 			'action=fancycaptchareload'
 				=> 'apihelp-fancycaptchareload-example-1',
-		];
+		);
 	}
 }

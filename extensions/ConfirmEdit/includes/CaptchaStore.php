@@ -1,33 +1,31 @@
 <?php
 
-use MediaWiki\Session\SessionManager;
-
 abstract class CaptchaStore {
 	/**
 	 * Store the correct answer for a given captcha
 	 * @param  $index String
 	 * @param  $info String the captcha result
 	 */
-	abstract public function store( $index, $info );
+	public abstract function store( $index, $info );
 
 	/**
 	 * Retrieve the answer for a given captcha
 	 * @param  $index String
-	 * @return String|false
+	 * @return String
 	 */
-	abstract public function retrieve( $index );
+	public abstract function retrieve( $index );
 
 	/**
 	 * Delete a result once the captcha has been used, so it cannot be reused
 	 * @param  $index
 	 */
-	abstract public function clear( $index );
+	public abstract function clear( $index );
 
 	/**
 	 * Whether this type of CaptchaStore needs cookies
 	 * @return Bool
 	 */
-	abstract public function cookiesNeeded();
+	public abstract function cookiesNeeded();
 
 	/**
 	 * The singleton instance
@@ -41,7 +39,7 @@ abstract class CaptchaStore {
 	 * @throws Exception
 	 * @return CaptchaStore
 	 */
-	final public static function get() {
+	public final static function get() {
 		if ( !self::$instance instanceof self ) {
 			global $wgCaptchaStorageClass;
 			if ( in_array( 'CaptchaStore', class_parents( $wgCaptchaStorageClass ) ) ) {
@@ -56,26 +54,31 @@ abstract class CaptchaStore {
 	/**
 	 * Protected constructor: no creating instances except through the factory method above
 	 */
-	protected function __construct() {
-	}
+	protected function __construct() {}
 }
 
 class CaptchaSessionStore extends CaptchaStore {
 	protected function __construct() {
 		// Make sure the session is started
-		SessionManager::getGlobalSession()->persist();
+		if ( session_id() === '' ) {
+			wfSetupSession();
+		}
 	}
 
 	function store( $index, $info ) {
-		SessionManager::getGlobalSession()->set( 'captcha' . $index, $info );
+		$_SESSION['captcha' . $info['index']] = $info;
 	}
 
 	function retrieve( $index ) {
-		return SessionManager::getGlobalSession()->get( 'captcha' . $index, false );
+		if ( isset( $_SESSION['captcha' . $index] ) ) {
+			return $_SESSION['captcha' . $index];
+		} else {
+			return false;
+		}
 	}
 
 	function clear( $index ) {
-		SessionManager::getGlobalSession()->remove( 'captcha' . $index );
+		unset( $_SESSION['captcha' . $index] );
 	}
 
 	function cookiesNeeded() {
@@ -109,32 +112,5 @@ class CaptchaCacheStore extends CaptchaStore {
 
 	function cookiesNeeded() {
 		return false;
-	}
-}
-
-class CaptchaHashStore extends CaptchaStore {
-	protected $data = [];
-
-	public function store( $index, $info ) {
-		$this->data[$index] = $info;
-	}
-
-	public function retrieve( $index ) {
-		if ( array_key_exists( $index, $this->data ) ) {
-			return $this->data[$index];
-		}
-		return false;
-	}
-
-	public function clear( $index ) {
-		unset( $this->data[$index] );
-	}
-
-	public function cookiesNeeded() {
-		return false;
-	}
-
-	public function clearAll() {
-		$this->data = [];
 	}
 }

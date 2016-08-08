@@ -3,14 +3,13 @@
 		"authors": [
 			"Sp5uhe",
 			"Chrumps",
-			"Peter Bowman",
-			"Tar Lócesilion"
+			"Peter Bowman"
 		]
 	},
-	"citethispage": "Przypis do tej strony",
+	"citethispage": "Bibliografia",
 	"citethispage-desc": "Dodaje stronę specjalną [[Special:CiteThisPage|obsługi cytowań]] i link w pasku narzędziowym",
 	"citethispage-link": "Cytowanie tego artykułu",
 	"tooltip-citethispage": "Informacja o tym jak należy cytować tę stronę",
-	"citethispage-change-submit": "Wygeneruj przypis bibliograficzny",
+	"citethispage-change-submit": "Stwórz wpis bibliograficzny",
 	"citethispage-change-target": "Strona:"
 }

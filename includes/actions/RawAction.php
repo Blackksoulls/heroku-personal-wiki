@@ -33,6 +33,14 @@
  * @ingroup Actions
  */
 class RawAction extends FormlessAction {
+	/**
+	 * Whether the request includes a 'gen' parameter
+	 * @var bool
+	 * @deprecated since 1.17 This used to be a string for "css" or "javascript" but
+	 * it is no longer used. Setting this parameter results in an empty response.
+	 */
+	private $gen = false;
+
 	public function getName() {
 		return 'raw';
 	}
@@ -69,28 +77,29 @@ class RawAction extends FormlessAction {
 		$maxage = $request->getInt( 'maxage', $config->get( 'SquidMaxage' ) );
 		$smaxage = $request->getIntOrNull( 'smaxage' );
 		if ( $smaxage === null ) {
-			if ( $contentType == 'text/css' || $contentType == 'text/javascript' ) {
-				// CSS/JS raw content has its own CDN max age configuration.
-				// Note: Title::getCdnUrls() includes action=raw for css/js pages,
+			if ( $this->gen ) {
+				$smaxage = $config->get( 'SquidMaxage' );
+			} elseif ( $contentType == 'text/css' || $contentType == 'text/javascript' ) {
+				// CSS/JS raw content has its own squid max age configuration.
+				// Note: Title::getSquidURLs() includes action=raw for css/js pages,
 				// so if using the canonical url, this will get HTCP purges.
 				$smaxage = intval( $config->get( 'ForcedRawSMaxage' ) );
 			} else {
-				// No CDN cache for anything else
+				// No squid cache for anything else
 				$smaxage = 0;
 			}
 		}
 
 		// Set standard Vary headers so cache varies on cookies and such (T125283)
 		$response->header( $this->getOutput()->getVaryHeader() );
-		if ( $config->get( 'UseKeyHeader' ) ) {
-			$response->header( $this->getOutput()->getKeyHeader() );
+		if ( $config->get( 'UseXVO' ) ) {
+			$response->header( $this->getOutput()->getXVO() );
 		}
 
 		$response->header( 'Content-type: ' . $contentType . '; charset=UTF-8' );
 		// Output may contain user-specific data;
 		// vary generated content for open sessions on private wikis
-		$privateCache = !User::isEveryoneAllowed( 'read' ) &&
-			( $smaxage == 0 || MediaWiki\Session\SessionManager::getGlobalSession()->isPersistent() );
+		$privateCache = !User::isEveryoneAllowed( 'read' ) && ( $smaxage == 0 || session_id() != '' );
 		// Don't accidentally cache cookies if user is logged in (T55032)
 		$privateCache = $privateCache || $this->getUser()->isLoggedIn();
 		$mode = $privateCache ? 'private' : 'public';
@@ -108,7 +117,7 @@ class RawAction extends FormlessAction {
 			$response->statusHeader( 404 );
 		}
 
-		if ( !Hooks::run( 'RawPageViewBeforeOutput', [ &$this, &$text ] ) ) {
+		if ( !Hooks::run( 'RawPageViewBeforeOutput', array( &$this, &$text ) ) ) {
 			wfDebug( __METHOD__ . ": RawPageViewBeforeOutput hook broke raw page output.\n" );
 		}
 
@@ -123,6 +132,11 @@ class RawAction extends FormlessAction {
 	 */
 	public function getRawText() {
 		global $wgParser;
+
+		# No longer used
+		if ( $this->gen ) {
+			return '';
+		}
 
 		$text = false;
 		$title = $this->getTitle();
@@ -234,7 +248,7 @@ class RawAction extends FormlessAction {
 			}
 		}
 
-		$allowedCTypes = [ 'text/x-wiki', 'text/javascript', 'text/css', 'application/x-zope-edit' ];
+		$allowedCTypes = array( 'text/x-wiki', 'text/javascript', 'text/css', 'application/x-zope-edit' );
 		if ( $ctype == '' || !in_array( $ctype, $allowedCTypes ) ) {
 			$ctype = 'text/x-wiki';
 		}

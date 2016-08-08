@@ -3,14 +3,9 @@
 		"authors": [
 			"Lejonel",
 			"Lokal Profil",
-			"WikiPhoenix",
-			"Ainali"
+			"WikiPhoenix"
 		]
 	},
 	"syntaxhighlight-desc": "Ger syntaxmarkering med [http://pygments.org/ Pygments] inuti <code>&lt;syntaxhighlight&gt;</code>-taggar",
-	"syntaxhighlight-visualeditor-mwsyntaxhighlightinspector-code": "Kod",
-	"syntaxhighlight-visualeditor-mwsyntaxhighlightinspector-language": "Språk",
-	"syntaxhighlight-visualeditor-mwsyntaxhighlightinspector-none": "(Ingen)",
-	"syntaxhighlight-visualeditor-mwsyntaxhighlightinspector-showlines": "Visa radnummer",
-	"syntaxhighlight-visualeditor-mwsyntaxhighlightinspector-title": "Kodblock"
+	"syntaxhighlight-visualeditor-mwsyntaxhighlightinspector-none": "(Ingen)"
 }

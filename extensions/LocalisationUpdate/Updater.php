@@ -5,12 +5,10 @@
  * @license GPL-2.0+
  */
 
-namespace LocalisationUpdate;
-
 /**
  * Executes the localisation update.
  */
-class Updater {
+class LU_Updater {
 	/**
 	 * Whether the path is a pattern and thus we need to use appropriate
 	 * code for fetching directories.
@@ -50,18 +48,18 @@ class Updater {
 	/**
 	 * Parses translations from given list of files.
 	 *
-	 * @param ReaderFactory $readerFactory Factory to construct parsers.
+	 * @param LU_ReaderFactory $readerFactory Factory to construct parsers.
 	 * @param array $files List of files with their contents as array values.
 	 * @return array List of translations indexed by language code.
 	 */
-	public function readMessages( ReaderFactory $readerFactory, array $files ) {
+	public function readMessages( LU_ReaderFactory $readerFactory, array $files ) {
 		$messages = array();
 
 		foreach ( $files as $filename => $contents ) {
 			$reader = $readerFactory->getReader( $filename );
 			try {
 				$parsed = $reader->parse( $contents );
-			} catch ( \Exception $e ) {
+			} catch ( Exception $e ) {
 				trigger_error( __METHOD__ . ": Unable to parse messages from $filename", E_USER_WARNING );
 				continue;
 			}
@@ -75,7 +73,7 @@ class Updater {
 
 			$c = array_sum( array_map( 'count', $parsed ) );
 			// Useful for debugging, maybe create interface to pass this to the script?
-			# echo "$filename with " . get_class( $reader ) . " and $c\n";
+			#echo "$filename with " . get_class( $reader ) . " and $c\n";
 		}
 
 		return $messages;
@@ -106,11 +104,11 @@ class Updater {
 	/**
 	 * Fetches files from given Url pattern.
 	 *
-	 * @param FetcherFactory $factory Factory to construct fetchers.
+	 * @param LU_FetcherFactory $factory Factory to construct fetchers.
 	 * @param string $path Url to the file or pattern of files.
 	 * @return array List of Urls with file contents as path.
 	 */
-	public function fetchFiles( FetcherFactory $factory, $path ) {
+	public function fetchFiles( LU_FetcherFactory $factory, $path ) {
 		$fetcher = $factory->getFetcher( $path );
 
 		if ( $this->isDirectory( $path ) ) {
@@ -124,9 +122,9 @@ class Updater {
 	}
 
 	public function execute(
-		Finder $finder,
-		ReaderFactory $readerFactory,
-		FetcherFactory $fetcherFactory,
+		LU_Finder $finder,
+		LU_ReaderFactory $readerFactory,
+		LU_FetcherFactory $fetcherFactory,
 		array $repos
 	) {
 

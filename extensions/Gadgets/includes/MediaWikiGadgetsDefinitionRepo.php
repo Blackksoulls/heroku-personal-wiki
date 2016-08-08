@@ -5,7 +5,7 @@
  */
 class MediaWikiGadgetsDefinitionRepo extends GadgetRepo {
 
-	const CACHE_VERSION = 2;
+	const CACHE_VERSION = 1;
 
 	private $definitionCache;
 
@@ -75,8 +75,7 @@ class MediaWikiGadgetsDefinitionRepo extends GadgetRepo {
 		$us = $this;
 		$value = $wanCache->getWithSetCallback(
 			$key,
-			Gadget::CACHE_TTL,
-			function ( $old, &$ttl ) use ( $us ) {
+			function( $old, &$ttl ) use ( $us ) {
 				$now = microtime( true );
 				$gadgets = $us->fetchStructuredList();
 				if ( $gadgets === false ) {
@@ -85,7 +84,9 @@ class MediaWikiGadgetsDefinitionRepo extends GadgetRepo {
 
 				return array( 'gadgets' => $gadgets, 'time' => $now );
 			},
-			array( 'checkKeys' => array( $key ), 'lockTSE' => 300 )
+			Gadget::CACHE_TTL,
+			array( $key ),
+			array( 'lockTSE' => 300 )
 		);
 
 		// Update the tier 1 cache as needed
@@ -181,7 +182,7 @@ class MediaWikiGadgetsDefinitionRepo extends GadgetRepo {
 		$options = trim( $m[2], ' []' );
 
 		foreach ( preg_split( '/\s*\|\s*/', $options, -1, PREG_SPLIT_NO_EMPTY ) as $option ) {
-			$arr = preg_split( '/\s*=\s*/', $option, 2 );
+			$arr  = preg_split( '/\s*=\s*/', $option, 2 );
 			$option = $arr[0];
 			if ( isset( $arr[1] ) ) {
 				$params = explode( ',', $arr[1] );
@@ -216,7 +217,7 @@ class MediaWikiGadgetsDefinitionRepo extends GadgetRepo {
 		}
 
 		foreach ( preg_split( '/\s*\|\s*/', $m[3], -1, PREG_SPLIT_NO_EMPTY ) as $page ) {
-			$page = "MediaWiki:Gadget-$page";
+			$page = "Gadget-$page";
 
 			if ( preg_match( '/\.js/', $page ) ) {
 				$info['scripts'][] = $page;
@@ -227,5 +228,6 @@ class MediaWikiGadgetsDefinitionRepo extends GadgetRepo {
 
 		return new Gadget( $info );
 	}
+
 
 }

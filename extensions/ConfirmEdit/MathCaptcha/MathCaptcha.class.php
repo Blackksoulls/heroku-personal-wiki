@@ -1,7 +1,5 @@
 <?php
 
-use MediaWiki\Auth\AuthenticationRequest;
-
 class MathCaptcha extends SimpleCaptcha {
 
 	/** Validate a captcha response */
@@ -11,34 +9,23 @@ class MathCaptcha extends SimpleCaptcha {
 
 	function addCaptchaAPI( &$resultArr ) {
 		list( $sum, $answer ) = $this->pickSum();
-		$html = $this->fetchMath( $sum );
-		$index = $this->storeCaptcha( [ 'answer' => $answer ] );
-		$resultArr['captcha'] = $this->describeCaptchaType();
+		$index = $this->storeCaptcha( array( 'answer' => $answer ) );
+		$resultArr['captcha']['type'] = 'math';
+		$resultArr['captcha']['mime'] = 'text/tex';
 		$resultArr['captcha']['id'] = $index;
-		$resultArr['captcha']['question'] = $html;
-	}
-
-	public function describeCaptchaType() {
-		return [
-			'type' => 'math',
-			'mime' => 'text/html',
-		];
+		$resultArr['captcha']['question'] = $sum;
 	}
 
 	/**
 	 * Produce a nice little form
 	 * @param OutputPage $out
 	 */
-	function getForm( OutputPage $out, $tabIndex = 1 ) {
+	function getForm( OutputPage $out ) {
 		list( $sum, $answer ) = $this->pickSum();
-		$index = $this->storeCaptcha( [ 'answer' => $answer ] );
+		$index = $this->storeCaptcha( array( 'answer' => $answer ) );
 
 		$form = '<table><tr><td>' . $this->fetchMath( $sum ) . '</td>';
-		$form .= '<td>' . Html::input( 'wpCaptchaWord', false, false, [
-			'tabindex' => $tabIndex,
-			'autocomplete' => 'off',
-			'required'
-		] ) . '</td></tr></table>';
+		$form .= '<td>' . Html::input( 'wpCaptchaWord', false, false, array( 'tabindex' => '1', 'autocomplete' => 'off', 'required' ) ) . '</td></tr></table>';
 		$form .= Html::hidden( 'wpCaptchaId', $index );
 		return $form;
 	}
@@ -50,43 +37,17 @@ class MathCaptcha extends SimpleCaptcha {
 		$op = mt_rand( 0, 1 ) ? '+' : '-';
 		$sum = "{$a} {$op} {$b} = ";
 		$ans = $op == '+' ? ( $a + $b ) : ( $a - $b );
-		return [ $sum, $ans ];
+		return array( $sum, $ans );
 	}
 
 	/** Fetch the math */
 	function fetchMath( $sum ) {
 		if ( class_exists( 'MathRenderer' ) ) {
-			$math = MathRenderer::getRenderer( $sum, [], 'png' );
+			$math = MathRenderer::getRenderer( $sum, array(), MW_MATH_PNG );
 		} else {
-			throw new LogicException(
-				'MathCaptcha requires the Math extension for MediaWiki versions 1.18 and above.' );
+			throw new Exception( 'MathCaptcha requires the Math extension for MediaWiki versions 1.18 and above.' );
 		}
-		$math->render();
-		$html = $math->getHtmlOutput();
+		$html = $math->render();
 		return preg_replace( '/alt=".*?"/', '', $html );
-	}
-
-	public function getCaptcha() {
-		list( $sum, $answer ) = $this->pickSum();
-		return [ 'question' => $sum, 'answer' => $answer ];
-	}
-
-	public function getCaptchaInfo( $captchaData, $id ) {
-		$sum = $captchaData['question'];
-		return $this->fetchMath( $sum );
-	}
-
-	public function onAuthChangeFormFields( array $requests, array $fieldInfo,
-		array &$formDescriptor, $action ) {
-		/** @var CaptchaAuthenticationRequest $req */
-		$req =
-			AuthenticationRequest::getRequestByClass( $requests,
-				CaptchaAuthenticationRequest::class, true );
-		if ( !$req ) {
-			return;
-		}
-
-		$formDescriptor['captchaInfo']['raw'] = true;
-		$formDescriptor['captchaWord']['label-message'] = null;
 	}
 }

@@ -1,82 +1,27 @@
 <?php
 
-use MediaWiki\Auth\AuthManager;
-
 class ConfirmEditHooks {
-	protected static $instanceCreated = false;
-
 	/**
 	 * Get the global Captcha instance
 	 *
 	 * @return SimpleCaptcha
 	 */
-	public static function getInstance() {
+	static function getInstance() {
 		global $wgCaptcha, $wgCaptchaClass;
 
-		if ( !static::$instanceCreated ) {
-			static::$instanceCreated = true;
+		static $done = false;
+
+		if ( !$done ) {
+			$done = true;
 			$wgCaptcha = new $wgCaptchaClass;
 		}
 
 		return $wgCaptcha;
 	}
 
-	/**
-	 * Registers conditional hooks.
-	 */
-	public static function onRegistration() {
-		global $wgDisableAuthManager, $wgAuthManagerAutoConfig;
-
-		if ( class_exists( AuthManager::class ) && !$wgDisableAuthManager ) {
-			$wgAuthManagerAutoConfig['preauth'][CaptchaPreAuthenticationProvider::class] = [
-				'class' => CaptchaPreAuthenticationProvider::class,
-				'sort'=> 10, // run after preauth providers not requiring user input
-			];
-			Hooks::register( 'AuthChangeFormFields', 'ConfirmEditHooks::onAuthChangeFormFields' );
-		} else {
-			Hooks::register( 'UserCreateForm', 'ConfirmEditHooks::injectUserCreate' );
-			Hooks::register( 'AbortNewAccount', 'ConfirmEditHooks::confirmUserCreate' );
-			Hooks::register( 'LoginAuthenticateAudit', 'ConfirmEditHooks::triggerUserLogin' );
-			Hooks::register( 'UserLoginForm', 'ConfirmEditHooks::injectUserLogin' );
-			Hooks::register( 'AbortLogin', 'ConfirmEditHooks::confirmUserLogin' );
-			Hooks::register( 'AddNewAccountApiForm', 'ConfirmEditHooks::addNewAccountApiForm' );
-			Hooks::register( 'AddNewAccountApiResult', 'ConfirmEditHooks::addNewAccountApiResult' );
-		}
-	}
-
 	static function confirmEditMerged( $context, $content, $status, $summary, $user, $minorEdit ) {
 		return self::getInstance()->confirmEditMerged( $context, $content, $status, $summary,
 			$user, $minorEdit );
-	}
-
-	/**
-	 * PageContentSaveComplete hook handler.
-	 * Clear IP whitelist cache on page saves for [[MediaWiki:captcha-ip-whitelist]].
-	 *
-	 * @param Page     $wikiPage
-	 * @param User     $user
-	 * @param Content  $content
-	 * @param string   $summary
-	 * @param bool     $isMinor
-	 * @param bool     $isWatch
-	 * @param string   $section
-	 * @param int      $flags
-	 * @param int      $revision
-	 * @param Status   $status
-	 * @param int      $baseRevId
-	 *
-	 * @return bool true
-	 */
-	static function onPageContentSaveComplete( Page $wikiPage, User $user, Content $content, $summary,
-		$isMinor, $isWatch, $section, $flags, $revision, Status $status, $baseRevId
-	) {
-		$title = $wikiPage->getTitle();
-		if ( $title->getText() === 'Captcha-ip-whitelist' && $title->getNamespace() === NS_MEDIAWIKI ) {
-			$cache = ObjectCache::getMainWANInstance();
-			$cache->delete( $cache->makeKey( 'confirmedit', 'ipwhitelist' ) );
-		}
-
-		return true;
 	}
 
 	static function confirmEditPage( $editpage, $buttons, $tabindex ) {
@@ -136,12 +81,6 @@ class ConfirmEditHooks {
 		return self::getInstance()->APIGetParamDescription( $module, $desc );
 	}
 
-	public static function onAuthChangeFormFields(
-		array $requests, array $fieldInfo, array &$formDescriptor, $action
-	) {
-		self::getInstance()->onAuthChangeFormFields( $requests, $fieldInfo, $formDescriptor, $action );
-	}
-
 	/**
 	 * Hook to add PHPUnit test cases.
 	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/UnitTestsList
@@ -156,7 +95,7 @@ class ConfirmEditHooks {
 		/**
 		 * @var SplFileInfo $fileInfo
 		 */
-		$ourFiles = [];
+		$ourFiles = array();
 		foreach ( new RecursiveIteratorIterator( $directoryIterator ) as $fileInfo ) {
 			if ( substr( $fileInfo->getFilename(), -8 ) === 'Test.php' ) {
 				$ourFiles[] = $fileInfo->getPathname();
@@ -176,7 +115,7 @@ class ConfirmEditHooks {
 
 		// There is no need to run (core) tests with enabled ConfirmEdit - bug T44145
 		if ( isset( $wgWikimediaJenkinsCI ) && $wgWikimediaJenkinsCI === true ) {
-			$wgCaptchaTriggers = array_fill_keys( array_keys( $wgCaptchaTriggers ), false );
+			$wgCaptchaTriggers = false;
 		}
 
 		if ( !$wgGroupPermissions['*']['read'] && $wgCaptchaTriggers['badlogin'] ) {
@@ -206,7 +145,7 @@ class ConfirmEditHooks {
 	 * FIXME: This should be done in a better way, e.g. only load the libraray, if really needed.
 	 */
 	public static function onReCaptchaSetup() {
-		require_once ( __DIR__ . '/../ReCaptcha/recaptchalib.php' );
+		require_once( __DIR__ . '/../ReCaptcha/recaptchalib.php' );
 	}
 
 	/**
@@ -215,9 +154,7 @@ class ConfirmEditHooks {
 	 */
 	public static function efReCaptcha() {
 		global $wgReCaptchaPublicKey, $wgReCaptchaPrivateKey;
-		// @codingStandardsIgnoreStart
 		global $recaptcha_public_key, $recaptcha_private_key;
-		// @codingStandardsIgnoreEnd
 		global $wgServerName;
 
 		// Backwards compatibility
@@ -229,10 +166,9 @@ class ConfirmEditHooks {
 		}
 
 		if ( $wgReCaptchaPublicKey == '' || $wgReCaptchaPrivateKey == '' ) {
-			die (
-				'You need to set $wgReCaptchaPrivateKey and $wgReCaptchaPublicKey in LocalSettings.php to ' .
+			die ( 'You need to set $wgReCaptchaPrivateKey and $wgReCaptchaPublicKey in LocalSettings.php to ' .
 				"use the reCAPTCHA plugin. You can sign up for a key <a href='" .
-				htmlentities( recaptcha_get_signup_url( $wgServerName, "mediawiki" ) ) . "'>here</a>." );
+				htmlentities( recaptcha_get_signup_url ( $wgServerName, "mediawiki" ) ) . "'>here</a>." );
 		}
 	}
 }

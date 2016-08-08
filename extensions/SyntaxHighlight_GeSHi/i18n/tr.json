@@ -2,10 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Erkan Yilmaz",
-			"Joseph",
-			"McAang"
+			"Joseph"
 		]
 	},
-	"syntaxhighlight-desc": "[http://pygments.org/ Pygments] kullanarak <code>&lt;syntaxhighlight&gt;</code> sözdizimi vurgulamasını sağlar",
-	"syntaxhighlight-visualeditor-mwsyntaxhighlightinspector-title": "Kod bloğu"
+	"syntaxhighlight-desc": "[http://pygments.org/ Pygments] kullanarak <code>&lt;syntaxhighlight&gt;</code> sözdizimi vurgulamasını sağlar"
 }
