@@ -145,3 +145,4 @@ $wgAllowExternalImages = true;
 $wgAllowImageTag = true;
 
 require_once "$IP/extensions/Spoilers/Spoilers.php";
+require_once "$IP/extensions/Imgur/Imgur.php";
