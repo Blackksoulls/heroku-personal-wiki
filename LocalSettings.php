@@ -142,5 +142,6 @@ wfLoadExtension( 'WikiEditor' );
 # Add more configuration options below.
 
 $wgAllowExternalImages = true;
+$wgAllowImageTag = true;
 
 require_once "$IP/extensions/Spoilers/Spoilers.php";
